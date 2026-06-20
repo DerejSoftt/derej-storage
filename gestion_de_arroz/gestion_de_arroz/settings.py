@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-r*@pv*g!frmth)4(g@@=j*qmvypl_h$yr$g9l84$^k#qk4&9k(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -77,7 +77,7 @@ WSGI_APPLICATION = 'gestion_de_arroz.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.mysql",
-        "NAME": "arroceradb",
+        "NAME": "derejstoragepb",
         "USER": "root",
         "PASSWORD": "",
         "HOST": "localhost",
