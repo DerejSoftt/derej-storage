@@ -2,6 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 # Create your views here.
 from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from .models import Representante, Factura
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -17,9 +19,27 @@ from datetime import datetime, date
 from django.db import transaction
 
 
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return JsonResponse({'success': True, 'redirect': '/dashboard'})
+        else:
+            return JsonResponse({'success': False, 'error': 'Usuario o contraseña incorrectos.'})
+    return redirect('index')
+
+def logout_view(request):
+    logout(request)
+    return redirect('index')
+
+@login_required
 def representantes(request):
     return render(request, "arrozcascara/representantes.html")
 
+@login_required
 def registrar_representante(request):
     if request.method == 'POST':
         cedula = request.POST.get('cedula')
@@ -42,6 +62,7 @@ def registrar_representante(request):
 def index(request):
     return render(request, "arrozcascara/index.html")
 
+@login_required
 def dashboard(request):
     # Obtener datos de la base de datos
     representantes = Representante.objects.all().values('id', 'nombre_completo', 'cedula', 'direccion')
@@ -124,6 +145,7 @@ def dashboard(request):
 
 
 
+@login_required
 def detalles(request):
     try:
         # Obtener parámetros de filtrado con valores por defecto
@@ -240,6 +262,7 @@ def detalles(request):
 
 
 @require_http_methods(["GET"])
+@login_required
 def obtener_factura(request, invoice_id):
     try:
         factura = Factura.objects.get(id=invoice_id)
@@ -262,6 +285,7 @@ def obtener_factura(request, invoice_id):
         return JsonResponse({'success': False, 'error': str(e)}, status=500)
 
 @require_http_methods(["POST"])
+@login_required
 def editar_factura(request, invoice_id):
     try:
         factura = Factura.objects.get(id=invoice_id)
@@ -318,6 +342,7 @@ def editar_factura(request, invoice_id):
 
 
 @require_http_methods(["POST"])
+@login_required
 def eliminar_factura(request, invoice_id):
     try:
         factura = Factura.objects.get(id=invoice_id)
@@ -331,6 +356,7 @@ def eliminar_factura(request, invoice_id):
 
 
 @require_http_methods(["POST"])
+@login_required
 def pagar_factura(request, invoice_id):
     try:
         factura = Factura.objects.get(id=invoice_id)
@@ -367,6 +393,7 @@ def pagar_factura(request, invoice_id):
 
 
 
+@login_required
 def registrodefacturas(request):
     representantes = Representante.objects.all().order_by('nombre_completo')
     return render(request, "arrozcascara/registrodefacturas.html", {
@@ -376,6 +403,7 @@ def registrodefacturas(request):
 
 
 @require_http_methods(["GET", "POST"])
+@login_required
 def registro_facturas(request):
     representantes = Representante.objects.all().order_by('nombre_completo')
     
@@ -397,6 +425,7 @@ def registro_facturas(request):
 
 
 @require_POST
+@login_required
 def registrar_factura(request):
     try:
         # Verificar si es carga de Excel
@@ -413,6 +442,7 @@ def registrar_factura(request):
 
 
 
+@login_required
 def handle_excel_upload(request):
     try:
         excel_file = request.FILES['excel-file']
@@ -511,6 +541,7 @@ def handle_excel_upload(request):
 
 
 
+@login_required
 def handle_manual_form(request):
     try:
         numero_factura = request.POST.get('numeroFactura')
@@ -610,12 +641,14 @@ def parse_excel_date(excel_date):
 
 
 
+@login_required
 def gestionderepresentantes(request):
     representantes = Representante.objects.all().order_by('nombre_completo')
     return render(request, "arrozcascara/gestionderepresentantes.html", {
         'representantes': representantes
     })
 
+@login_required
 def get_representante(request, id):
     try:
         representante = get_object_or_404(Representante, id=id)
@@ -636,6 +669,7 @@ def get_representante(request, id):
     return JsonResponse(data)
 
 @require_POST
+@login_required
 def editar_representante(request, id):
     try:
         representante = get_object_or_404(Representante, id=id)
@@ -651,6 +685,7 @@ def editar_representante(request, id):
     return redirect('gestionderepresentantes')
 
 @require_POST
+@login_required
 def eliminar_representante(request, id):
     try:
         representante = get_object_or_404(Representante, id=id)
@@ -666,39 +701,3 @@ def eliminar_representante(request, id):
             'message': f'Error al eliminar representante: {str(e)}'
         }, status=500)
 
-
-
-
-
-
-
-
-
-
-from datetime import datetime, date, timedelta
-from django.utils.dateparse import parse_date
-
-def parse_excel_date(excel_date):
-    """Convierte varios formatos de fecha de Excel a objeto date"""
-    if excel_date is None:
-        return date.today()
-    
-    # Si es número de Excel (días desde 1900-01-01)
-    if isinstance(excel_date, (int, float)):
-        try:
-            return (datetime(1899, 12, 30) + timedelta(days=excel_date)).date()
-        except:
-            return date.today()
-    
-    # Si ya es un objeto datetime
-    if isinstance(excel_date, datetime):
-        return excel_date.date()
-    
-    # Si es string, intentar parsear
-    if isinstance(excel_date, str):
-        try:
-            return parse_date(excel_date.strip())
-        except (ValueError, TypeError):
-            pass
-    
-    return date.today()

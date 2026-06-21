@@ -4,13 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arrocera OSA - Dashboard</title>
+    <title>DerejStorage - Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        :root {
+            --green-primary: #2d5016;
+            --green-dark: #1a3009;
+            --green-medium: #3d6b1f;
+            --green-light: #4d7b2f;
+            --green-bg-light: #f0f9f0;
+            --gold: #ffd700;
+            --gold-light: #ffb300;
+            --gold-bg: #fff8e1;
+            --text-dark: #1a3009;
+            --text-gray: #666;
+            --border: #e5e7eb;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --transition: all 0.3s ease;
         }
 
         body {
@@ -167,6 +186,27 @@
         .user-profile p {
             font-size: 0.875rem;
             color: #a3d977;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #dc3545;
+            border-color: #dc3545;
         }
 
         /* Mobile Overlay */
@@ -629,40 +669,40 @@
     <nav id="sidebar" class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
-                <div class="logo-icon">🌾</div>
+                <div class="logo-icon"><i class="fas fa-seedling"></i></div>
                 <div class="logo-text">
-                    <h1>Arrocera OSA</h1>
-                    <p>Sistema de Facturación</p>
+                    <h1>DerejStorage</h1>
+                    <p>Sistema de Gestión de Factura</p>
                 </div>
             </div>
         </div>
 
         <ul class="nav-menu">
             <li><a href="{% url 'index' %}" class="nav-link">
-                <span class="nav-icon">🏠</span>
+                <span class="nav-icon"><i class="fas fa-home"></i></span>
                 <span>Inicio</span>
             </a></li>
             <li><a href="{% url 'registrodefacturas' %}" class="nav-link">
-                <span class="nav-icon">📄</span>
+                <span class="nav-icon"><i class="fas fa-file-invoice"></i></span>
                 <span>Facturas</span>
             </a></li>
 
              <li><a href="{% url 'detalles' %}" class="nav-link ">
-                <span class="nav-icon">📊</span>
+                <span class="nav-icon"><i class="fas fa-chart-bar"></i></span>
                 <span>Rep. y Facturas</span>
             </a></li>
 
             <li><a href="{% url 'representantes' %}" class="nav-link">
-                <span class="nav-icon">👤</span>
+                <span class="nav-icon"><i class="fas fa-user"></i></span>
                 <span>Registro Rep.</span>
             </a></li>
             <li><a href="{% url 'gestionderepresentantes' %}" class="nav-link">
-                <span class="nav-icon">👥</span>
+                <span class="nav-icon"><i class="fas fa-users"></i></span>
                 <span>Gestión Rep.</span>
             </a></li>
            
             <li><a href="{% url 'dashboard' %}" class="nav-link active">
-                <span class="nav-icon">📈</span>
+                <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
                 <span>Dashboard</span>
             </a></li>
            
@@ -674,6 +714,9 @@
                 <div class="user-avatar">{{ request.user.first_name|first|default:'A' }}</div>
                 <p>{{ request.user.get_full_name|default:'Admin Usuario' }}</p>
             </div>
+            <a href="{% url 'logout' %}" class="logout-btn" title="Cerrar Sesión">
+                <i class="fas fa-sign-out-alt"></i> <span>Cerrar Sesión</span>
+            </a>
         </div>
     </nav>
 
@@ -686,7 +729,7 @@
         <header class="page-header">
             <div class="header-content">
                 <div class="header-info">
-                    <div class="header-icon">📈</div>
+                    <div class="header-icon"><i class="fas fa-chart-line"></i></div>
                     <div class="header-text">
                         <h1>Dashboard de Ventas</h1>
                         <p>Análisis de rendimiento por representante</p>
@@ -697,7 +740,7 @@
                         Última actualización: {{ last_update }}
                     </div>
                     <button id="refresh-btn" class="refresh-btn">
-                        🔄 Actualizar
+                        <i class="fas fa-sync-alt"></i> Actualizar
                     </button>
                 </div>
             </div>
@@ -708,7 +751,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-title">Total Representantes</div>
-                    <div class="stat-icon">👥</div>
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
                 </div>
                 <div class="stat-value" id="total-representatives">{{ total_representantes }}</div>
                 <div class="stat-description">Representantes activos con ventas</div>
@@ -717,7 +760,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-title">Total Facturas</div>
-                    <div class="stat-icon">📄</div>
+                    <div class="stat-icon"><i class="fas fa-file-invoice"></i></div>
                 </div>
                 <div class="stat-value" id="total-invoices">{{ total_facturas }}</div>
                 <div class="stat-description">Facturas registradas en el sistema</div>
@@ -726,7 +769,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-title">Total Sacos</div>
-                    <div class="stat-icon">📦</div>
+                    <div class="stat-icon"><i class="fas fa-boxes"></i></div>
                 </div>
                 <div class="stat-value" id="total-sacks">{{ total_sacos }}</div>
                 <div class="stat-description">Sacos vendidos en total</div>
@@ -735,7 +778,7 @@
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-title">Promedio por Rep.</div>
-                    <div class="stat-icon">📊</div>
+                    <div class="stat-icon"><i class="fas fa-chart-simple"></i></div>
                 </div>
                 <div class="stat-value" id="average-sacks">{{ promedio_sacos }}</div>
                 <div class="stat-description">Sacos promedio por representante</div>
@@ -748,7 +791,7 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <div>
-                        <div class="chart-title">📦 Sacos Vendidos por Representante</div>
+                        <div class="chart-title"><i class="fas fa-boxes"></i> Sacos Vendidos por Representante</div>
                         <div class="chart-subtitle">Distribución de ventas acumuladas por cada representante</div>
                     </div>
                 </div>
@@ -761,7 +804,7 @@
             <div class="chart-card">
                 <div class="chart-header">
                     <div>
-                        <div class="chart-title">📄 Facturas por Representante</div>
+                        <div class="chart-title"><i class="fas fa-file-invoice"></i> Facturas por Representante</div>
                         <div class="chart-subtitle">Número de facturas registradas por cada representante</div>
                     </div>
                 </div>
@@ -805,7 +848,7 @@
                 {% endfor %}
             {% else %}
                 <div class="no-data-message">
-                    <div class="no-data-icon">📊</div>
+                    <div class="no-data-icon"><i class="fas fa-chart-simple"></i></div>
                     <h3>No hay datos disponibles</h3>
                     <p>No se encontraron representantes o facturas registradas en el sistema.</p>
                 </div>
@@ -861,7 +904,7 @@
 
         // Refresh functionality
         refreshBtn.addEventListener('click', () => {
-            refreshBtn.innerHTML = '⏳ Actualizando...';
+            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Actualizando...';
             refreshBtn.disabled = true;
             
             // Simulate refresh (in a real app, this would be an AJAX call)
@@ -928,10 +971,10 @@
                             displayColors: true,
                             callbacks: {
                                 label: function(context) {
-                                    return `📦 ${context.parsed.y.toLocaleString()} sacos`;
+                                    return `Sacos: ${context.parsed.y.toLocaleString()}`;
                                 },
                                 title: function(context) {
-                                    return `👤 ${context[0].label}`;
+                                    return `${context[0].label}`;
                                 }
                             }
                         }
@@ -1036,10 +1079,10 @@
                             callbacks: {
                                 label: function(context) {
                                     const value = context.parsed.y;
-                                    return `📄 ${value} factura${value !== 1 ? 's' : ''}`;
+                                    return `${value} factura${value !== 1 ? 's' : ''}`;
                                 },
                                 title: function(context) {
-                                    return `👤 ${context[0].label}`;
+                                    return `${context[0].label}`;
                                 }
                             }
                         }
@@ -1131,7 +1174,7 @@
             notification.className = `notification notification-${type}`;
             notification.innerHTML = `
                 <div class="notification-content">
-                    <span class="notification-icon">${type === 'success' ? '✅' : type === 'error' ? '❌' : 'ℹ️'}</span>
+                    <span class="notification-icon">${type === 'success' ? '<i class="fas fa-check-circle"></i>' : type === 'error' ? '<i class="fas fa-times-circle"></i>' : '<i class="fas fa-info-circle"></i>'}</span>
                     <span class="notification-message">${message}</span>
                     <button class="notification-close">×</button>
                 </div>
@@ -1171,7 +1214,7 @@
 
         // Initialize dashboard on load
         setTimeout(() => {
-            showNotification('📊 Dashboard cargado exitosamente', 'success');
+            showNotification('Dashboard cargado exitosamente', 'success');
         }, 1000);
     </script>
 </body>

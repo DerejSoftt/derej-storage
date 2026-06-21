@@ -1,0 +1,10 @@
+# Forzar a que todos los archivos de texto se normalicen a LF al hacer commit
+* text=auto
+
+# Asegurar que los archivos de código fuente siempre usen LF (crítico para Python/Django y Bash)
+*.py text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=l
